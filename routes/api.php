@@ -29,4 +29,4 @@ use Illuminate\Http\Request;
  /* Transactions */
  Route::resource('transactions', 'Transaction\TransactionController',['only'=>['index','show']]);
  /* Users */
- Route::resource('users', 'User\UserController',['except'=>['create','edit']]);
+ Route::resource('users', 'User\UserController',['except'=>['create','edit']]); 
