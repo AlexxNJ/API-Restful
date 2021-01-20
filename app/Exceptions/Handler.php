@@ -6,6 +6,7 @@ use Exception;
 use App\Traits\ApiResponser;
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -84,6 +85,11 @@ class Handler extends ExceptionHandler
                 return $this->errorResponse('No se puede eliminar de forma permanente el recurso porque está relacionado con algún otro.',409);
             }
         }
+
+        if($exception instanceof TokenMismatchException){
+            return redirect()->back()->withInput($request->input());
+        }
+
         if(config('app.debug')){
             return parent::render($request, $exception);
         }
@@ -93,12 +99,27 @@ class Handler extends ExceptionHandler
     }
 
     public function unauthenticated($request,AuthenticationException $exception){
+        if($this->isFrontend($request)){
+            return redirect()->guest('login');
+        }
         return $this->errorResponse('No autenticado',401);
     }
 
     protected function convertValidationExceptionToResponse(ValidationException $e, $request)
     {
         $errors = $e->validator->errors()->getMessages();
+
+        if($this->isFrontend($request)){
+            return $request->ajax() ? response()->json($errors,422) : redirect()
+                ->back()
+                ->withInput($request->input())
+                ->withErrors($errors);
+        }
+
         return $this->errorResponse($errors, 422);
+    }
+
+    private function isFrontend($request){
+        return $request->acceptsHtml() && collect($request->route()->middleware())->contains('web');
     }
 }
