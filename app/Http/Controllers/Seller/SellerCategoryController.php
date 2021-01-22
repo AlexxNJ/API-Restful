@@ -8,6 +8,9 @@ use App\Http\Controllers\ApiController;
 
 class SellerCategoryController extends ApiController
 {
+    public function __constructor(){
+        parent::__constructor();
+    }
     /**
      * Display a listing of the resource.
      *
