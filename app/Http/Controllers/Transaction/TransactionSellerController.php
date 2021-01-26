@@ -11,6 +11,7 @@ class TransactionSellerController extends ApiController
     public function __constructor(){
         parent::__constructor();
         $this->middleware('scope:read-general')->only('index');
+        $this->middleware('can:view,transaction')->only('index');
     }
     /**
      * Display a listing of the resource.
